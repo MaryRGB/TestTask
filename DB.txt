@@ -1,0 +1,37 @@
+DROP TABLE phone;
+DROP TABLE user_role;
+DROP TABLE role;
+DROP TABLE user;
+
+CREATE TABLE "user" (
+    id             INTEGER PRIMARY KEY,
+    first_name     VARCHAR NOT NULL,
+    last_name      VARCHAR NOT NULL,
+    email          VARCHAR NOT NULL
+);
+
+CREATE TABLE user_role (
+    id          INTEGER PRIMARY KEY,
+    user_id     INTEGER NOT NULL,
+    role_id     INTEGER NOT NULL,
+
+    CONSTRAINT ur_user_fk FOREIGN KEY ( user_id )
+        REFERENCES user ( id ),
+    CONSTRAINT ur_role_fk FOREIGN KEY ( role_id )
+        REFERENCES role ( id )
+);
+
+
+CREATE TABLE role (
+    id     INTEGER PRIMARY KEY,
+    "name"   VARCHAR NOT NULL
+);
+
+CREATE TABLE phone (
+    id               INTEGER PRIMARY KEY,
+    user_id          INTEGER NOT NULL,
+    phone_number     VARCHAR NOT NULL,
+
+    CONSTRAINT phone_user_fk FOREIGN KEY ( user_id )
+        REFERENCES user ( id )
+);
