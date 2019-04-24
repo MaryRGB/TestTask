@@ -28,7 +28,7 @@ public class Main {
                         break;
                     case "info":
                         try {
-                            worker.getInfo(scanner);
+                            System.out.println(worker.getInfo(scanner));
                         }
                         catch(Exception ex){
                             ex.printStackTrace();

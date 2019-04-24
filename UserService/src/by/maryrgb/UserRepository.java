@@ -48,18 +48,28 @@ public class UserRepository {
     public String getUserInfo(String firstName, String lastName, String email) {
         try {
             String userID = getUserId(firstName, lastName, email);
+            String result = "";
 
             PreparedStatement prepStatement = null;
-            prepStatement = connection.prepareStatement("SELECT " +
-                    "GROUP_CONCAT(name, ', ') AS roles, " +
-                    "GROUP_CONCAT(phone_number, ', ') AS phones" +
-                    "FROM (user_role JOIN role ON user_role.role_id = role.id) AS roles, phone " +
-                    "WHERE phone.user_id = ? AND roles.user_id = ?");
+            prepStatement = connection.prepareStatement("SELECT GROUP_CONCAT(name) AS roles\n" +
+                    "FROM user_role JOIN role ON user_role.role_id = role.id\n" +
+                    "WHERE user_id = ?");
             prepStatement.setString(1, userID);
-            prepStatement.setString(2, userID);
             ResultSet rs = prepStatement.executeQuery();
+            if(rs.next()){
+                result += "roles: " + rs.getString(1) + "\n\r";
+            }
 
-            return "roles: " + rs.getString(1) + "\n\rPhones: " + rs.getString(2);
+            prepStatement = connection.prepareStatement("SELECT GROUP_CONCAT(phone_number) AS roles\n" +
+                    "FROM phone\n" +
+                    "WHERE user_id = ?");
+            prepStatement.setString(1, userID);
+            rs = prepStatement.executeQuery();
+            if(rs.next()){
+                result += "phone numbers: " + rs.getString(1);
+            }
+
+            return result;
         }
         catch(SQLException sqlex){
             sqlex.printStackTrace();
