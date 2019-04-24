@@ -19,7 +19,7 @@ public class DBConnection {
         try{
             if(DATABASE_DRIVER == null){
                 Properties properties = new Properties();
-                properties.load(Files.newInputStream(Paths.get("I:\\TestProject\\UserService\\src\\app.properties")));
+                properties.load(Files.newInputStream(Paths.get("I:\\TestTask\\UserService\\src\\app.properties")));
                 DATABASE_DRIVER = properties.getProperty("db.driver");
                 DATABASE_URL = properties.getProperty("db.url");
                 DATABASE_USERNAME = properties.getProperty("db.username");
