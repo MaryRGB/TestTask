@@ -16,7 +16,7 @@ public class UserRepository {
     public void create(User user){
         PreparedStatement prepStatement = null;
         try {
-            prepStatement = connection.prepareStatement("INSERT INTO \"user\"(first_name, last_name, email) values (?, ?, ?)");
+            prepStatement = connection.prepareStatement("INSERT INTO user(first_name, last_name, email) values (?, ?, ?)");
             prepStatement.setString(1, user.getFirstName());
             prepStatement.setString(2, user.getLastName());
             prepStatement.setString(3, user.getEmail());
@@ -51,8 +51,8 @@ public class UserRepository {
 
             PreparedStatement prepStatement = null;
             prepStatement = connection.prepareStatement("SELECT " +
-                    "LISTAGG(\"name\", ', ') WITHIN GROUP (ORDER BY \"name\") \"roles\", " +
-                    "LISTAGG(phone_number, ', ') WITHIN GROUP (ORDER BY phone_number) \"phones\"" +
+                    "GROUP_CONCAT(name, ', ') AS roles, " +
+                    "GROUP_CONCAT(phone_number, ', ') AS phones" +
                     "FROM (user_role JOIN role ON user_role.role_id = role.id) AS roles, phone " +
                     "WHERE phone.user_id = ? AND roles.user_id = ?");
             prepStatement.setString(1, userID);
@@ -72,15 +72,15 @@ public class UserRepository {
             String userID = getUserId(firstName, lastName, email);
 
             PreparedStatement prepStatement = null;
-            prepStatement = connection.prepareStatement("DELETE FROM \"user\" WHERE id = ?");
-            prepStatement.setString(1, userID);
-            ResultSet rs = prepStatement.executeQuery();
-
             prepStatement = connection.prepareStatement("DELETE FROM user_role WHERE user_id = ?");
             prepStatement.setString(1, userID);
             prepStatement.executeUpdate();
 
             prepStatement = connection.prepareStatement("DELETE FROM phone WHERE user_id = ?");
+            prepStatement.setString(1, userID);
+            prepStatement.executeUpdate();
+
+            prepStatement = connection.prepareStatement("DELETE FROM user WHERE id = ?");
             prepStatement.setString(1, userID);
             prepStatement.executeUpdate();
 
@@ -107,7 +107,7 @@ public class UserRepository {
 
     public String getUserId(String firstName, String lastName, String email) throws SQLException{
         PreparedStatement prepStatement = null;
-        prepStatement = connection.prepareStatement("SELECT id FROM \"user\" WHERE first_name = ?, last_name = ?, email = ?");
+        prepStatement = connection.prepareStatement("SELECT id FROM user WHERE first_name = ? AND last_name = ? AND email = ?");
         prepStatement.setString(1, firstName);
         prepStatement.setString(2, lastName);
         prepStatement.setString(3, email);
@@ -129,7 +129,7 @@ public class UserRepository {
 
     public String getRoleId(String name) throws SQLException{
         PreparedStatement prepStatement = null;
-        prepStatement = connection.prepareStatement("SELECT id FROM role WHERE \"name\" = ?");
+        prepStatement = connection.prepareStatement("SELECT id FROM role WHERE name = ?");
         prepStatement.setString(1, name);
         ResultSet rs = prepStatement.executeQuery();
 
@@ -137,15 +137,18 @@ public class UserRepository {
             return rs.getString(1);
         }
 
-        prepStatement = connection.prepareStatement("INSERT INTO role(\"name\") values (?)");
+        prepStatement = connection.prepareStatement("INSERT INTO role(name) values (?)");
         prepStatement.setString(1, name);
         prepStatement.executeUpdate();
 
-        prepStatement = connection.prepareStatement("SELECT id FROM role WHERE \"name\" = ?");
+        prepStatement = connection.prepareStatement("SELECT id FROM role WHERE name = ?");
         prepStatement.setString(1, name);
         rs = prepStatement.executeQuery();
 
-        return rs.getString(1);
+        if(rs.next()) {
+            return rs.getString(1);
+        }
+        return "";
     }
 
     public void closeConnection(){
