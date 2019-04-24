@@ -38,16 +38,6 @@ public class DBConnection {
         catch (Exception ex){
             ex.printStackTrace();
         }
-        finally{
-            try{
-                if(conn != null){
-                    conn.close();
-                }
-            }
-            catch(SQLException sqlex2){
-                sqlex2.printStackTrace();
-            }
-        }
 
         return conn;
     }
